@@ -1,5 +1,7 @@
+# Overview
 The run_analysis.R file is a script that performs 5 steps over data that has been produced by a smartphone’s gyroscope and accelerometer.  30 different subjects generated this data; these subjects were split into two groups (test and train).
 
+# Process and Data File Produced
 The fifth step culminates in the production of a CourseProject_TidyData.txt file.  An over of the steps taken to produce this is given below:
 
 Step One:  A subjectMaster dataset is produced through the use of rbind.  Rbind combines the two separate ‘train’ and ‘test’ datasets.
