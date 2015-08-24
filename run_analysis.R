@@ -89,7 +89,7 @@ masterLogic <- (grepl("activity..",colNames_) |
                         !grepl("-std()..-",colNames_))
 
 # Use this vector to subject the data for the relevant entries
-subjectM_SD <- subjectMaster[subjectM_SD == TRUE]
+subjectMaster <- subjectMaster[masterLogic == TRUE]
 
 ## Step 3: Use descriptive activity names to name the activities
 ## in the master dataset
