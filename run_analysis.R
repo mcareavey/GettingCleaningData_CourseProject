@@ -154,6 +154,9 @@ subjectMasterLogic2 <- subjectMasterLogic2[,c(1,81,2:80)]
 # Do this by using ddply (plyr)
 library(plyr)
 
+# Participant and Activity columns taken as variables for this, so
+# that the mean isn't applied.
+# Numcolwise used to apply function to each column number entry
 tidyData <-  ddply(subjectMasterLogic2, c("Participant", "Activity"), numcolwise(mean))
 
 # Write the file for the tidyData dataset
