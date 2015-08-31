@@ -51,7 +51,7 @@ test_data <- read.table("./test/X_test.txt")
 test_labels <- read.table("./test/y_test.txt")
 test_subject <- read.table("./test/subject_test.txt")
 
-# Assign colNames_ to each of the datasets
+# Assign colnames to each of the datasets
 colnames(activity_labels) <- c("ActivityCode", "Activity")
 colnames(train_labels) <- "ActivityCode"
 colnames(test_labels) <- "ActivityCode"
@@ -69,38 +69,48 @@ subjectMaster <- rbind(test_set, train_set)
 
 ## Step 2: Extract only the means and std. dev. for each measurement
 
-# Create a variable (colNames_) that takes the colNames_ of the subjectMaster
+# Create a variable (colNames_) that takes the colnames of the subjectMaster
 # dataset
 
 colNames_ <- colnames(subjectMaster)
 
-# Enable grepl package
-library(grepl)
-
 # Use grepl function to create a logical vector variable. This vector will
 # then be used to pull out the measurements of the mean and std. dev.
 # only.
-masterLogic <- (grepl("activity..",colNames_) | 
-                        grepl("subject..",colNames_) | 
+# Masterlogic used as an example to show how can exclude columns
+# that share a similar naming convention but shouldn't be included
+masterLogic <- (grepl("ActivityCode",colNames_) | 
+                        grepl("Participant",colNames_) | 
                         grepl("-mean..",colNames_) & 
                         !grepl("-meanFreq..",colNames_) & 
                         !grepl("mean..-",colNames_) | 
                         grepl("-std..",colNames_) & 
                         !grepl("-std()..-",colNames_))
 
+
+masterLogic2 <- (grepl("ActivityCode",colNames_) | 
+                        grepl("Participant",colNames_) | 
+                        grepl("-mean..",colNames_) | 
+                        grepl("-std..",colNames_))
+
 # Use this vector to subject the data for the relevant entries
-subjectMaster <- subjectMaster[masterLogic == TRUE]
+subjectMasterLogic <- subjectMaster[masterLogic == TRUE]
+
+subjectMasterLogic2 <- subjectMaster[masterLogic2 == TRUE]
 
 ## Step 3: Use descriptive activity names to name the activities
 ## in the master dataset
 
 # Update the existing subjectMaster datset with activity_labels.
 # Merged the two sets together by ActivityCode
-subjectMaster <- merge(subjectMaster, activity_labels, by = "ActivityCode", all.x = TRUE)
+subjectMasterLogic <- merge(subjectMasterLogic, activity_labels, by.x = "ActivityCode", all.x = TRUE)
 
+subjectMasterLogic2 <- merge(subjectMasterLogic2, activity_labels, by.x = "ActivityCode", all.x = TRUE)
 # Update the colNames_ variable we created, given we have now added
 # a new column, "Activity"
-colNames_ <- colnames(subjectMaster)
+# subjectMasterLogic2 selected as the viable option for this course
+# as it yields 81 columns vs. 20.  More direction required.
+colNames_ <- colnames(subjectMasterLogic2)
 
 ## Step 4: Appropriately label the master dataset with descriptive
 ## activity names
@@ -127,18 +137,24 @@ for (i in 1:length(colNames_))
 }
 
 # Assign the new column names to the master dataset
-colnames(subjectMaster) <- colNames_
+colnames(subjectMasterLogic2) <- colNames_
 
 ## Step 5: Create a second, independent tidy dataset with the avg. 
 ## of each variable for each activity and each subject.
 
 # Remove ActivityCode column, leaving the Activity column and
 # Participant as the key identifiers
-subjectMaster$ActivityCode <- NULL
+subjectMasterLogic2$ActivityCode <- NULL
+
+# Reorder columns so that Activity is between Participant and
+# remainder of columns
+subjectMasterLogic2 <- subjectMasterLogic2[,c(1,81,2:80)]
 
 # Apply means to each column except Participant and Activity.
-# Do this by using ddply
-tidyData <- ddply(subjectMaster, c("Participant", "Activity"), numcolwise(mean))
+# Do this by using ddply (plyr)
+library(plyr)
+
+tidyData <-  ddply(subjectMasterLogic2, c("Participant", "Activity"), numcolwise(mean))
 
 # Write the file for the tidyData dataset
 write.table(tidyData, file = "CourseProject_TidyData.txt")
